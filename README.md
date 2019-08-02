@@ -10,7 +10,7 @@ Running ```cargo build --release``` will build the binary in the ```target/relea
 ```./rust_grep [QUERY] [FILE NAME]```
 
 * **[QUERY]** - The query that will be searched for in the specified stream.
-* **[FILE NAME]** - OPTIONAL - If specified, the program will search for que query in the given file. If not, the program will search the query in the terminal's standard output.
+* **[FILE NAME]** - OPTIONAL - If specified, the program will search for the query in the given file. If not, the program will search the query in the terminal's standard output.
 
 Examples:
 * ```./rust_grep "nevermore" theraven.txt ```
