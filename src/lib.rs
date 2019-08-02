@@ -79,7 +79,7 @@ fn read_content(config: &Config) -> Result<String, io::Error> {
     }
 }
 
-fn print_results(results: &Vec<Match>, config: &Config) -> Result<(), Box<dyn Error>> {
+fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error>> {
     let query_len = config.query.chars().count();
 
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -146,7 +146,7 @@ impl Config {
         args.next();
 
         let query = args.next().ok_or("Missing query argument")?;
-        let filename = args.next().unwrap_or(String::new());
+        let filename = args.next().unwrap_or_default();
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
         Ok(Config { query, filename, case_sensitive })

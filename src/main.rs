@@ -13,7 +13,6 @@ fn main() {
 
     if let Err(e) = rust_grep::run(config) {
         eprintln!("Application error: {}", e);
-
         process::exit(1);
     }
 }
