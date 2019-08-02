@@ -86,22 +86,26 @@ fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error
     let standard_color = ColorSpec::new();
     stdout.set_color(&standard_color)?;
 
+    let mut start: usize = 0;
     for m in results {
-        write!(&mut stdout, "{}", &m.line[0 .. m.index])?;
-        // writes everything up to the matched query
+        for found in &m.indexes {
+            write!(&mut stdout, "{}", &m.line[start .. *found])?;
+            // writes everything up to the matched query
 
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
-        // sets the color to blue
+            stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
+            // sets the color to blue
 
-        write!(&mut stdout, "{}", &m.line[m.index .. m.index+query_len])?;
-        // writes the matched query
+            write!(&mut stdout, "{}", &m.line[*found .. *found + query_len])?;
+            // writes the matched query
 
-        stdout.set_color(&standard_color)?;
-        // sets the color back to default
+            stdout.set_color(&standard_color)?;
+            // sets the color back to default
 
-        writeln!(&mut stdout, "{}",
-                 &m.line[m.index+config.query.chars().count() ..])?;
-        // writes everything past the matched query
+            start = *found + query_len;
+        }
+
+        writeln!(&mut stdout, "{}", &m.line[start ..])?;
+        start = 0;
     }
 
     Ok(())
@@ -111,8 +115,24 @@ pub fn search<'a>(query: &str, content: &'a str) -> Vec<Match<'a>> {
     let mut results = Vec::new();
 
     for line in content.lines() {
-        if let Some(index) = line.find(query) {
-            results.push(Match { line, index });
+        let mut i = 0;
+        let mut curr_match: Option<Match> = None;
+
+        while let Some(mut index) = line[i..].find(query) {
+            index += i;
+            i = index + 1;
+            match curr_match {
+                Some(ref mut m) => {
+                    m.indexes.push(index);
+                },
+                None => {
+                    curr_match = Some(Match { line, indexes: vec![index] });
+                },
+            };
+        }
+
+        if let Some(m) = curr_match {
+            results.push(m);
         }
     }
 
@@ -124,8 +144,24 @@ pub fn search_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<Match<'
     let query = query.to_lowercase();
 
     for line in content.lines() {
-        if let Some(index) = line.to_lowercase().find(&query) {
-            results.push(Match { line, index });
+        let mut i = 0;
+        let mut m: Option<Match> = None;
+
+        while let Some(mut index) = line.to_lowercase()[i..].find(&query) {
+            index += i;
+            i = index + 1;
+            match m {
+                Some(ref mut m) => {
+                    m.indexes.push(index);
+                },
+                None => {
+                    m = Some(Match { line, indexes: vec![index] });
+                },
+            };
+        }
+
+        if let Some(m) = m {
+            results.push(m);
         }
     }
 
@@ -155,5 +191,5 @@ impl Config {
 
 pub struct Match<'a> {
     pub line: &'a str,
-    pub index: usize,
+    pub indexes: Vec<usize>,
 }
