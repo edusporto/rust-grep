@@ -1,9 +1,10 @@
 use std::error::Error;
 use std::fs;
+use std::io::{self, Read};
 
 extern crate termcolor;
 use std::io::Write;
-use termcolor::{BufferWriter, Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[cfg(test)]
 mod tests {
@@ -27,7 +28,16 @@ Pick three.";
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string(&config.filename)?;
+    let content = if config.filename.is_empty() {
+        // if no file is specified, the program will read
+        // from stdin until EOF
+        let mut buffer = String::new();
+        while io::stdin().read_to_string(&mut buffer)? != 0 {}
+
+        buffer
+    } else {
+        fs::read_to_string(&config.filename)?
+    };
 
     let results = search(&config.query, &content);
 
@@ -79,8 +89,9 @@ impl Config {
         I: Iterator<Item = String>,
     {
         args.next();
+
         let query = args.next().ok_or("Missing query argument")?;
-        let filename = args.next().ok_or("Missing file name argument")?;
+        let filename = args.next().unwrap_or(String::new());
 
         Ok(Config { query, filename })
     }
