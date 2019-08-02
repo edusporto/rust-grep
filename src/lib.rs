@@ -7,6 +7,8 @@ extern crate termcolor;
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
+use atty::Stream;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,30 +84,42 @@ fn read_content(config: &Config) -> Result<String, io::Error> {
 fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error>> {
     let query_len = config.query.chars().count();
 
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let standard_color = ColorSpec::new();
-    stdout.set_color(&standard_color)?;
+    if atty::is(Stream::Stdout) {
+        // The current thread is being executed in a terminal
+        // Print the occurences with colors
 
-    let mut start: usize = 0;
-    for m in results {
-        for found in &m.indexes {
-            write!(&mut stdout, "{}", &m.line[start .. *found])?;
-            // writes everything up to the matched query
+        let mut stdout = StandardStream::stdout(ColorChoice::Always);
+        let standard_color = ColorSpec::new();
+        stdout.set_color(&standard_color)?;
 
-            stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
-            // sets the color to blue
+        let mut start: usize = 0;
+        for m in results {
+            for found in &m.indexes {
+                write!(&mut stdout, "{}", &m.line[start .. *found])?;
+                // writes everything up to the matched query
 
-            write!(&mut stdout, "{}", &m.line[*found .. *found + query_len])?;
-            // writes the matched query
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
+                // sets the color to blue
 
-            stdout.set_color(&standard_color)?;
-            // sets the color back to default
+                write!(&mut stdout, "{}", &m.line[*found .. *found + query_len])?;
+                // writes the matched query
 
-            start = *found + query_len;
+                stdout.set_color(&standard_color)?;
+                // sets the color back to default
+
+                start = *found + query_len;
+            }
+
+            writeln!(&mut stdout, "{}", &m.line[start ..])?;
+            start = 0;
         }
+    } else {
+        // The current thread is not being executed in a terminal
+        // Don't print the occurrences with colors
 
-        writeln!(&mut stdout, "{}", &m.line[start ..])?;
-        start = 0;
+        for m in results {
+            println!("{}", m.line);
+        }
     }
 
     Ok(())
