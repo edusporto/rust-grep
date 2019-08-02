@@ -1,5 +1,5 @@
 [package]
-name = "rust_grep"
+name = "rust-grep"
 version = "0.1.0"
 authors = ["Eduardo Sandalo Porto <30930225+edusporto@users.noreply.github.com>"]
 edition = "2018"

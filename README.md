@@ -7,14 +7,12 @@ Running ```cargo build --release``` will build the binary in the ```target/relea
 
 
 ## Usage
-```./rust_grep [QUERY] [FILE NAME]```
+```./rust-grep [QUERY] [FILE NAME]```
 
 * **[QUERY]** - The query that will be searched for in the specified stream.
 * **[FILE NAME]** - OPTIONAL - If specified, the program will search for the query in the given file. If not, the program will search the query in the terminal's standard output.
 
 Examples:
-* ```./rust_grep "nevermore" theraven.txt ```
-* ```cat theraven.txt | ./rust_grep "nevermore"```
+* ```./rust-grep "nevermore" theraven.txt ```
+* ```cat theraven.txt | ./rust-grep "nevermore"```
 Both examples will produce the same output.
-
-*Please note:* The characater separating "rust" from "grep" is an underscore (_), not a hyphen.
