@@ -49,8 +49,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         write!(&mut stdout, "{}", &m.line()[0..m.index()])?;
         // writes everything up to the matched query
 
-        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
-        // sets the color to green
+        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
+        // sets the color to blue
 
         write!(&mut stdout, "{}", &config.query)?;
         // writes the matched query
