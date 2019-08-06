@@ -1,11 +1,11 @@
 use std::env;
 use std::process;
 
-use rust_grep::Config;
+use rust_grep::config::Config;
 
 fn main() {
     let mut args = env::args();
-
+    
     let config = Config::new(&mut args).unwrap_or_else(|err| {
         eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);

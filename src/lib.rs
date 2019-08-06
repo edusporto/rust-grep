@@ -1,11 +1,15 @@
 use std::error::Error;
 use std::fs;
 use std::io::{self, Read};
-use std::env;
+
+pub mod config;
+use config::Config;
+pub mod matches;
+use matches::Match;
 
 extern crate termcolor;
 use std::io::Write;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 use atty::Stream;
 
@@ -89,8 +93,7 @@ fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error
         // Print the occurences with colors
 
         let mut stdout = StandardStream::stdout(ColorChoice::Always);
-        let standard_color = ColorSpec::new();
-        stdout.set_color(&standard_color)?;
+        let color = config.color;
 
         let mut start: usize = 0;
         for m in results {
@@ -98,14 +101,14 @@ fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error
                 write!(&mut stdout, "{}", &m.line[start .. *found])?;
                 // writes everything up to the matched query
 
-                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Blue)))?;
+                stdout.set_color(ColorSpec::new().set_fg(color))?;
                 // sets the color to blue
 
                 write!(&mut stdout, "{}", &m.line[*found .. *found + query_len])?;
                 // writes the matched query
 
-                stdout.set_color(&standard_color)?;
                 // sets the color back to default
+                stdout.reset()?;
 
                 start = *found + query_len;
             }
@@ -180,30 +183,4 @@ pub fn search_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<Match<'
     }
 
     results
-}
-
-pub struct Config {
-    pub query: String,
-    pub filename: String,
-    pub case_sensitive: bool,
-}
-
-impl Config {
-    pub fn new<I>(args: &mut I) -> Result<Config, &'static str>
-    where
-        I: Iterator<Item = String>,
-    {
-        args.next();
-
-        let query = args.next().ok_or("Missing query argument")?;
-        let filename = args.next().unwrap_or_default();
-        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
-
-        Ok(Config { query, filename, case_sensitive })
-    }
-}
-
-pub struct Match<'a> {
-    pub line: &'a str,
-    pub indexes: Vec<usize>,
 }
