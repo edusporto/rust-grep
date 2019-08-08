@@ -93,7 +93,10 @@ fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error
         // Print the occurences with colors
 
         let mut stdout = StandardStream::stdout(ColorChoice::Always);
-        let color = config.color;
+        let mut color_spec = ColorSpec::new();
+        color_spec.set_fg(config.color)
+            .set_bold(true)
+            .set_intense(true);
 
         let mut start: usize = 0;
         for m in results {
@@ -101,7 +104,7 @@ fn print_results(results: &[Match], config: &Config) -> Result<(), Box<dyn Error
                 write!(&mut stdout, "{}", &m.line[start .. *found])?;
                 // writes everything up to the matched query
 
-                stdout.set_color(ColorSpec::new().set_fg(color))?;
+                stdout.set_color(&color_spec)?;
                 // sets the color to blue
 
                 write!(&mut stdout, "{}", &m.line[*found .. *found + query_len])?;

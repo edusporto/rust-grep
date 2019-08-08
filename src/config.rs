@@ -20,6 +20,7 @@ impl Config {
         let filename = args.next().unwrap_or_default();
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
         let color = Some(Color::Yellow);
+
         // for now, the color isn't configurable
 
         Ok(Config { query, filename, case_sensitive, color })
